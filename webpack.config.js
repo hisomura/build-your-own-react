@@ -3,7 +3,8 @@ const HtmlWebpackPlugin = require('html-webpack-plugin')
 
 module.exports = {
   mode: "development",
-  entry: { index: './src/index.js' },
+  // devtool: 'inline-source-map', // It seems to be worked without explicitly configuring this property.
+  entry: { index: './src/index.ts' },
   devServer: {
     open: true,
     contentBase: path.join(__dirname, 'public'),
@@ -14,6 +15,11 @@ module.exports = {
   },
   module: {
     rules: [
+      {
+        test: /\.tsx?$/,
+        use: 'ts-loader',
+        exclude: /node_modules/,
+      },
       {
         test: /\.css$/,
         use: [

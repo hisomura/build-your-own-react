@@ -13,7 +13,9 @@
     "css-loader": "^3.6.0",
     "html-loader": "^1.1.0",
     "html-webpack-plugin": "^4.3.0",
-    "webpack-dev-server": "^3.11.0"
+    "webpack-dev-server": "^3.11.0",
+    "typescript": "^3.9.5",
+    "ts-loader": "^7.0.5"
   },
   "keywords": [],
   "author": "",
