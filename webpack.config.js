@@ -4,6 +4,11 @@ const HtmlWebpackPlugin = require('html-webpack-plugin')
 module.exports = {
   mode: "development",
   entry: { index: './src/index.js' },
+  devServer: {
+    open: true,
+    contentBase: path.join(__dirname, 'public'),
+    compress: true
+  },
   output: {
     path: path.resolve(__dirname, 'public'),
   },
