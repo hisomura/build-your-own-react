@@ -1,4 +1,4 @@
-function createElement(type: string, props: any, ...children: any[]) {
+function createElement(type: string, props: any = null, ...children: any[]) {
   return {
     type,
     props: {
