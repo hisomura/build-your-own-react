@@ -10,5 +10,5 @@ const element = (
 console.log('hello, world')
 console.log(element)
 
-// const container = document.getElementById("root")
-// Didact.render(element, container)
+const container = document.getElementById("root")
+Didact.render(element, container)
