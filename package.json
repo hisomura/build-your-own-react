@@ -15,7 +15,11 @@
     "html-webpack-plugin": "^4.3.0",
     "webpack-dev-server": "^3.11.0",
     "typescript": "^3.9.5",
-    "ts-loader": "^7.0.5"
+    "ts-loader": "^7.0.5",
+    "prettier": "^2.0.5",
+    "jest": "^26.1.0",
+    "ts-jest": "^26.1.1",
+    "@types/jest": "^26.0.3"
   },
   "keywords": [],
   "author": "",

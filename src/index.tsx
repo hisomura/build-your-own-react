@@ -1,5 +1,5 @@
 import './index.css'
-import Didact from "./lib/diadact";
+import Didact from './lib/diadact'
 
 const element = (
   <div id="foo">
