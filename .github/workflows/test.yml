@@ -20,7 +20,7 @@ jobs:
     - name: actions/checkout
       uses: actions/checkout@v2
     - name: actions/setup-node
-      uses: actions/setup-node@v2
+      uses: actions/setup-node@v2-beta
       with:
         node-version: '12'
     - name: Install dependencies
