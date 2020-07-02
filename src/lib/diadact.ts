@@ -23,6 +23,22 @@ function render(element: VirtualElement | VirtualTextElement, container: HTMLEle
   container?.appendChild(dom)
 }
 
+let nextUnitOfWork: string | null | void = null
+
+function workLoop(deadline: RequestIdleCallbackDeadline) {
+  let shouldYield = false
+  while (nextUnitOfWork && !shouldYield) {
+    nextUnitOfWork = performUnitOfWork(nextUnitOfWork)
+    shouldYield = deadline.timeRemaining() < 1
+  }
+  window.requestIdleCallback(workLoop)
+}
+window.requestIdleCallback(workLoop)
+
+function performUnitOfWork(nextUnitOfWork: any) {
+  // TODO
+}
+
 const Didact = {
   createElement,
   render,
