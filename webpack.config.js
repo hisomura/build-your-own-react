@@ -3,7 +3,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin')
 
 module.exports = {
   mode: "development",
-  // devtool: 'inline-source-map', // It seems to be worked without explicitly configuring this property.
+  devtool: 'inline-source-map',
   entry: { index: './src/index.tsx' },
   devServer: {
     open: true,

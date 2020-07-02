@@ -1,7 +1,7 @@
-import Didact from './diadact'
+import { createElement } from './element'
 
 test('<div/> returns expected element', () => {
-  const element = Didact.createElement('div')
+  const element = createElement('div')
   expect(element).toEqual({
     type: 'div',
     props: { children: [] },
@@ -9,7 +9,7 @@ test('<div/> returns expected element', () => {
 })
 
 test('<div id="foo" /> returns expected element', () => {
-  const element = Didact.createElement('div', { id: 'foo' })
+  const element = createElement('div', { id: 'foo' })
   expect(element).toEqual({
     type: 'div',
     props: { id: 'foo', children: [] },
@@ -17,7 +17,7 @@ test('<div id="foo" /> returns expected element', () => {
 })
 
 test('<a>link</a> returns text element', () => {
-  const childElement = Didact.createElement('a', null, 'bar')
+  const childElement = createElement('a', null, 'bar')
 
   expect(childElement).toEqual({
     type: 'a',
@@ -28,8 +28,8 @@ test('<a>link</a> returns text element', () => {
 })
 
 test('<div id="foo"><a>link</a></div> returns expected element', () => {
-  const childElement = Didact.createElement('a', null, 'bar')
-  const element = Didact.createElement('div', { id: 'foo' }, childElement)
+  const childElement = createElement('a', null, 'bar')
+  const element = createElement('div', { id: 'foo' }, childElement)
   expect(element).toEqual({
     type: 'div',
     props: { id: 'foo', children: [childElement] },
