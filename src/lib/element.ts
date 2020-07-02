@@ -1,8 +1,8 @@
-export type VirtualElement = {
+export type VirtualHtmlElement = {
   type: string
   props: {
     [propName: string]: any
-    children: (VirtualElement | VirtualTextElement)[]
+    children: (VirtualHtmlElement | VirtualTextElement)[]
   }
 }
 
@@ -13,7 +13,9 @@ export type VirtualTextElement = {
   }
 }
 
-export function createElement(type: string, props: any = null, ...children: any[]): VirtualElement | VirtualTextElement {
+export type VirtualElement = VirtualHtmlElement | VirtualTextElement
+
+export function createElement(type: string, props: any = null, ...children: any[]): VirtualElement {
   return {
     type,
     props: {
@@ -36,6 +38,6 @@ export function createTextElement(text: string): VirtualTextElement {
   }
 }
 
-export function isTextNode(e: VirtualElement | VirtualTextElement): e is VirtualTextElement {
+export function isTextNode(e: VirtualElement): e is VirtualTextElement {
   return e.type === 'TEXT_ELEMENT'
 }

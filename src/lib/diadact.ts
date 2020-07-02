@@ -1,6 +1,6 @@
-import { VirtualElement, VirtualTextElement, isTextNode, createElement } from './element'
+import { VirtualElement, isTextNode, createElement } from './element'
 
-function render(element: VirtualElement | VirtualTextElement, container: HTMLElement | null) {
+function render(element: VirtualElement, container: HTMLElement | null) {
   if (isTextNode(element)) {
     container?.appendChild(document.createTextNode(element.props.nodeValue))
     return
