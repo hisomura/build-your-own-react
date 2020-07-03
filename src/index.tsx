@@ -11,4 +11,5 @@ console.log('hello, world')
 console.log(element)
 
 const container = document.getElementById("root")
+if (!container) throw new Error('no root.')
 Didact.render(element, container)

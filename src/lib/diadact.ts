@@ -1,29 +1,17 @@
-import { VirtualElement, isTextNode, createElement } from './element'
+import { VirtualElement, createElement } from './element'
 
-function render(element: VirtualElement, container: HTMLElement | null) {
-  if (isTextNode(element)) {
-    container?.appendChild(document.createTextNode(element.props.nodeValue))
-    return
-  }
-
-  const dom = document.createElement(element.type)
-  const isProperty = (key: string) => key !== 'children'
-  Object.keys(element.props)
-    .filter(isProperty)
-    .forEach((name) => {
-      if (name === 'id') {
-        dom[name] = element.props[name] // FIXME
-      }
-    })
-
-  element.props.children.forEach((child) => {
-    render(child, dom)
-  })
-
-  container?.appendChild(dom)
+type Fiber = {
+  type: string // FIXME
+  dom: HTMLElement | Text | null
+  props: VirtualElement['props']
+  parent: Fiber | null
+  child?: Fiber
+  sibling?: Fiber
 }
 
-let nextUnitOfWork: string | null | void = null
+// FIXME
+let nextUnitOfWork: Fiber | null = null
+window.requestIdleCallback(workLoop)
 
 function workLoop(deadline: RequestIdleCallbackDeadline) {
   let shouldYield = false
@@ -33,10 +21,82 @@ function workLoop(deadline: RequestIdleCallbackDeadline) {
   }
   window.requestIdleCallback(workLoop)
 }
-window.requestIdleCallback(workLoop)
 
-function performUnitOfWork(nextUnitOfWork: any) {
-  // TODO
+function performUnitOfWork(fiber: Fiber): Fiber | null {
+  if (!fiber.dom) {
+    fiber.dom = createDom(fiber)
+  }
+
+  if (fiber.parent) {
+    fiber.parent.dom!.appendChild(fiber.dom) // A parent must have dom.
+  }
+
+  if ('children' in fiber.props) {
+    const elements = fiber.props.children
+    let prevSibling: Fiber | null = null
+
+    for (let i = 0; i < elements.length; i += 1) {
+      const element = elements[i]
+      const newFiber: Fiber = {
+        type: element.type,
+        parent: fiber,
+        dom: null,
+        props: element.props,
+      }
+
+      if (!prevSibling) {
+        fiber.child = newFiber
+      } else {
+        prevSibling.sibling = newFiber
+      }
+
+      prevSibling = newFiber
+    }
+  }
+
+  if (fiber.child) {
+    return fiber.child
+  }
+  let nextFiber: Fiber | null = fiber
+  while (nextFiber) {
+    if (nextFiber.sibling) {
+      return nextFiber.sibling
+    }
+    nextFiber = nextFiber.parent
+  }
+
+  return null
+}
+
+function createDom(fiber: Fiber) {
+  // FIXME
+  if (fiber.type === 'TEXT_ELEMENT') {
+    return document.createTextNode(fiber.props.nodeValue)
+  }
+
+  const dom = document.createElement(fiber.type)
+  const isProperty = (key: string) => key !== 'children'
+
+  Object.keys(fiber.props)
+    .filter(isProperty)
+    .forEach((name) => {
+      // FIXME ts-ignore
+      // @ts-ignore
+      dom[name] = fiber.props[name]
+    })
+
+  return dom
+}
+
+function render(element: VirtualElement, container: HTMLElement) {
+  nextUnitOfWork = {
+    dom: container,
+    parent: null,
+    type: 'ELEMENT', // FIXME
+    props: {
+      children: [element],
+    },
+  }
 }
 
 const Didact = {
