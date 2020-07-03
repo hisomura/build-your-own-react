@@ -1,9 +1,9 @@
-import { VirtualElement, createElement } from './element'
+import { VirtualNode, createElement } from './create-node'
 
 type Fiber = {
   type: string // FIXME
   dom: HTMLElement | Text | null
-  props: VirtualElement['props']
+  props: VirtualNode['props']
   parent: Fiber | null
   child?: Fiber
   sibling?: Fiber
@@ -88,7 +88,7 @@ function createDom(fiber: Fiber) {
   return dom
 }
 
-function render(element: VirtualElement, container: HTMLElement) {
+function render(element: VirtualNode, container: HTMLElement) {
   nextUnitOfWork = {
     dom: container,
     parent: null,

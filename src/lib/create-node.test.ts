@@ -1,4 +1,4 @@
-import { createElement } from './element'
+import { createElement } from './create-node'
 
 test('<div/> returns expected element', () => {
   const element = createElement('div')
