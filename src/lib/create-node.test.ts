@@ -22,7 +22,7 @@ test('<a>link</a> returns text element', () => {
   expect(childElement).toEqual({
     type: 'a',
     props: {
-      children: [{ props: { nodeValue: 'bar' }, type: 'TEXT_ELEMENT' }],
+      children: [{ props: { nodeValue: 'bar' }, type: 'TEXT' }],
     },
   })
 })

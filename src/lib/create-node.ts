@@ -6,8 +6,8 @@ export type VirtualElement = {
   }
 }
 
-export type VirtualText= {
-  type: 'TEXT_ELEMENT'
+export type VirtualText = {
+  type: 'TEXT'
   props: {
     nodeValue: string
   }
@@ -22,16 +22,16 @@ export function createElement(type: string, props: any = null, ...children: any[
       ...props,
       children: children.map((child) => {
         if (typeof child === 'object') return child
-        if (typeof child === 'string' || child === 'number') return createTextElement(child)
+        if (typeof child === 'string' || child === 'number') return createText(child)
         throw Error('Child is not object, string or number.')
       }),
     },
   }
 }
 
-export function createTextElement(text: string): VirtualText {
+export function createText(text: string): VirtualText {
   return {
-    type: 'TEXT_ELEMENT',
+    type: 'TEXT',
     props: {
       nodeValue: text,
     },
@@ -39,5 +39,5 @@ export function createTextElement(text: string): VirtualText {
 }
 
 export function isTextNode(e: VirtualNode): e is VirtualText {
-  return e.type === 'TEXT_ELEMENT'
+  return e.type === 'TEXT'
 }

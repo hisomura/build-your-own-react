@@ -70,7 +70,7 @@ function performUnitOfWork(fiber: Fiber): Fiber | null {
 
 function createDom(fiber: Fiber) {
   // FIXME
-  if (fiber.type === 'TEXT_ELEMENT') {
+  if (fiber.type === 'TEXT') {
     return document.createTextNode(fiber.props.nodeValue)
   }
 
