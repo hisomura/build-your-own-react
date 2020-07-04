@@ -11,6 +11,7 @@ type Fiber = {
 
 // FIXME
 let nextUnitOfWork: Fiber | null = null
+let wipRoot: Fiber | null = null
 window.requestIdleCallback(workLoop)
 
 function workLoop(deadline: RequestIdleCallbackDeadline) {
@@ -19,16 +20,17 @@ function workLoop(deadline: RequestIdleCallbackDeadline) {
     nextUnitOfWork = performUnitOfWork(nextUnitOfWork)
     shouldYield = deadline.timeRemaining() < 1
   }
+
+  if (!nextUnitOfWork && wipRoot) {
+    commitRoot()
+  }
+
   window.requestIdleCallback(workLoop)
 }
 
 function performUnitOfWork(fiber: Fiber): Fiber | null {
   if (!fiber.dom) {
     fiber.dom = createDom(fiber)
-  }
-
-  if (fiber.parent) {
-    fiber.parent.dom!.appendChild(fiber.dom) // A parent must have dom.
   }
 
   if ('children' in fiber.props) {
@@ -88,8 +90,22 @@ function createDom(fiber: Fiber) {
   return dom
 }
 
+function commitRoot() {
+  if (wipRoot?.child) {
+    commitWork(wipRoot.child)
+  }
+  wipRoot = null
+}
+
+function commitWork(fiber: Fiber) {
+  const domParent = fiber.parent!.dom! // fiber must have parent.
+  domParent.appendChild(fiber.dom!)
+  if (fiber.child) commitWork(fiber.child)
+  if (fiber.sibling) commitWork(fiber.sibling)
+}
+
 function render(element: VirtualNode, container: HTMLElement) {
-  nextUnitOfWork = {
+  wipRoot = {
     dom: container,
     parent: null,
     type: 'ELEMENT', // FIXME
@@ -97,6 +113,7 @@ function render(element: VirtualNode, container: HTMLElement) {
       children: [element],
     },
   }
+  nextUnitOfWork = wipRoot
 }
 
 const Didact = {
