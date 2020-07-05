@@ -1,7 +1,7 @@
 export type VirtualElement = {
-  type: string
+  type: string // lowercase
   props: {
-    [propName: string]: any
+    [propName: string]: string | number | VirtualNode[] | EventListener
     children: VirtualNode[]
   }
 }
