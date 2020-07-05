@@ -9,12 +9,20 @@ type Fiber = {
   sibling?: Fiber
   alternate?: Fiber | null
   effectTag?: 'UPDATE' | 'PLACEMENT' | 'DELETION'
+  hooks?: Hook[]
+}
+
+type Hook<T = any> = {
+  state: T
+  queue: Function[]
 }
 
 let nextUnitOfWork: Fiber | null = null
 let wipRoot: Fiber | null = null
 let currentRoot: Fiber | null = null
 let deletions: Fiber[] | null = null
+let wipFiber: Fiber | null = null
+let hookIndex: number = 0
 window.requestIdleCallback(workLoop)
 
 function workLoop(deadline: RequestIdleCallbackDeadline) {
@@ -53,10 +61,45 @@ function performUnitOfWork(fiber: Fiber): Fiber | null {
 }
 
 function updateFunctionComponent(fiber: Fiber) {
+  wipFiber = fiber
+  hookIndex = 0
+  wipFiber.hooks = []
+
   const child = (fiber.type as Function)(fiber.props)
   if (!child) return
 
   reconcileChildren(fiber, [child])
+}
+
+function useState<T>(initial: T): [T, (action: (state: T) => T) => void] {
+  const oldHook = wipFiber?.alternate?.hooks ? wipFiber.alternate.hooks[hookIndex] : null
+  const hook: Hook<T> = {
+    state: oldHook ? oldHook.state : initial,
+    queue: [],
+  }
+  const actions = oldHook ? oldHook.queue : []
+  actions.forEach((action) => {
+    hook.state = action(hook.state)
+  })
+
+  const setState = (action: Function) => {
+    hook.queue.push(action)
+
+    wipRoot = {
+      dom: currentRoot!.dom,
+      parent: null,
+      type: 'ROOT',
+      props: currentRoot!.props,
+      alternate: currentRoot,
+    }
+    nextUnitOfWork = wipRoot
+    deletions = []
+  }
+
+  wipFiber?.hooks?.push(hook)
+  hookIndex += 1
+
+  return [hook.state, setState]
 }
 
 function updateHostComponent(fiber: Fiber) {
@@ -231,6 +274,7 @@ function render(element: VirtualNode, container: HTMLElement) {
 }
 
 const Didact = {
+  useState,
   createElement,
   render,
 }

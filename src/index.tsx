@@ -12,10 +12,16 @@ function Random() {
   return <p>foobar</p>
 }
 
+function Counter() {
+  const [state, setState] = Didact.useState(1)
+  return <h1 onclick={() => setState((c: number) => c + 1)}>count: {state}</h1>
+}
+
 const element = (
   <div id="foo">
     <a>bar</a>
     <Random />
+    <Counter />
     <App name="foo" />
   </div>
 )
