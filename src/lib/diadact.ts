@@ -1,7 +1,7 @@
 import { VirtualNode, createElement } from './create-node'
 
 type Fiber = {
-  type: string
+  type: string | Function
   dom: HTMLElement | Text | null
   props: VirtualNode['props']
   parent: Fiber | null
@@ -32,12 +32,10 @@ function workLoop(deadline: RequestIdleCallbackDeadline) {
 }
 
 function performUnitOfWork(fiber: Fiber): Fiber | null {
-  if (!fiber.dom) {
-    fiber.dom = createDom(fiber)
-  }
-
-  if ('children' in fiber.props) {
-    reconcileChildren(fiber, fiber.props.children)
+  if (fiber.type instanceof Function) {
+    updateFunctionComponent(fiber)
+  } else {
+    updateHostComponent(fiber)
   }
 
   if (fiber.child) {
@@ -52,6 +50,23 @@ function performUnitOfWork(fiber: Fiber): Fiber | null {
   }
 
   return null
+}
+
+function updateFunctionComponent(fiber: Fiber) {
+  const child = (fiber.type as Function)(fiber.props)
+  if (!child) return
+
+  reconcileChildren(fiber, [child])
+}
+
+function updateHostComponent(fiber: Fiber) {
+  if (!fiber.dom) {
+    fiber.dom = createDom(fiber)
+  }
+
+  if ('children' in fiber.props) {
+    reconcileChildren(fiber, fiber.props.children)
+  }
 }
 
 function reconcileChildren(wipFiber: Fiber, elements: VirtualNode[]) {
@@ -108,7 +123,7 @@ function createDom(fiber: Fiber) {
     return document.createTextNode('' + fiber.props.nodeValue)
   }
 
-  const dom = document.createElement(fiber.type)
+  const dom = document.createElement('' + fiber.type)
   updateDom(dom, { children: [] }, fiber.props)
 
   return dom
@@ -124,19 +139,35 @@ function commitRoot() {
 }
 
 function commitWork(fiber: Fiber) {
-  const domParent = fiber.parent!.dom! // fiber must have parent.
+  let domParentFiber = fiber.parent!
+  while (!domParentFiber.dom) {
+    domParentFiber = domParentFiber.parent!
+  }
+
+  // @ts-ignore FIXME
+  const domParent = domParentFiber.dom
 
   // FIXME remove null check
   if (fiber.effectTag === 'PLACEMENT' && fiber.dom !== null) {
+    // @ts-ignore FIXME
     domParent.appendChild(fiber.dom)
   } else if (fiber.effectTag === 'UPDATE' && fiber.dom !== null) {
     updateDom(fiber.dom, fiber.alternate!.props, fiber.props)
   } else if (fiber.effectTag === 'DELETION') {
-    domParent.removeChild(fiber.dom!)
+    commitDeletion(fiber, domParent)
   }
 
   if (fiber.child) commitWork(fiber.child)
   if (fiber.sibling) commitWork(fiber.sibling)
+}
+
+function commitDeletion(fiber: Fiber, domParent: HTMLElement | Text) {
+  if (fiber.dom) {
+    // @ts-ignore FIXME
+    domParent.removeChild(fiber.dom!)
+  } else {
+    if (fiber.child) commitDeletion(fiber.child, domParent)
+  }
 }
 
 const isProperty = (key: string) => key !== 'children' && !isEvent(key)
