@@ -73,8 +73,7 @@ function reconcileChildren(wipFiber: Fiber, elements: VirtualNode[]) {
         alternate: oldFiber,
         effectTag: 'UPDATE',
       }
-    }
-    if (!sameType) {
+    } else {
       newFiber = {
         type: element.type,
         props: element.props,
@@ -83,10 +82,11 @@ function reconcileChildren(wipFiber: Fiber, elements: VirtualNode[]) {
         alternate: null,
         effectTag: 'PLACEMENT',
       }
-    }
-    if (oldFiber && !sameType) {
-      oldFiber.effectTag = 'DELETION'
-      deletions?.push(oldFiber)
+
+      if (oldFiber) {
+        oldFiber.effectTag = 'DELETION'
+        deletions?.push(oldFiber)
+      }
     }
     // TODO key check like React
 
@@ -94,14 +94,13 @@ function reconcileChildren(wipFiber: Fiber, elements: VirtualNode[]) {
       oldFiber = oldFiber.sibling
     }
 
-    // FIXME newFiber!
     if (!prevSibling) {
-      wipFiber.child = newFiber!
+      wipFiber.child = newFiber
     } else {
-      prevSibling.sibling = newFiber!
+      prevSibling.sibling = newFiber
     }
 
-    prevSibling = newFiber!
+    prevSibling = newFiber
   }
 }
 
