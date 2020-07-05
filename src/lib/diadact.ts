@@ -1,7 +1,7 @@
 import { VirtualNode, createElement } from './create-node'
 
 type Fiber = {
-  type: string // FIXME
+  type: string
   dom: HTMLElement | Text | null
   props: VirtualNode['props']
   parent: Fiber | null
@@ -11,7 +11,6 @@ type Fiber = {
   effectTag?: 'UPDATE' | 'PLACEMENT' | 'DELETION'
 }
 
-// FIXME
 let nextUnitOfWork: Fiber | null = null
 let wipRoot: Fiber | null = null
 let currentRoot: Fiber | null = null
@@ -105,9 +104,8 @@ function reconcileChildren(wipFiber: Fiber, elements: VirtualNode[]) {
 }
 
 function createDom(fiber: Fiber) {
-  // FIXME
   if (fiber.type === 'TEXT') {
-    return document.createTextNode(fiber.props.nodeValue)
+    return document.createTextNode('' + fiber.props.nodeValue)
   }
 
   const dom = document.createElement(fiber.type)
@@ -145,16 +143,16 @@ const isProperty = (key: string) => key !== 'children' && !isEvent(key)
 const isEvent = (key: string) => key.startsWith('on')
 const isNew = (prev: any, next: any) => (key: string) => prev[key] !== next[key]
 const isGone = (next: { [propName: string]: any }) => (key: string) => !(key in next)
-function updateDom(dom: Fiber['dom'], prevProps: Fiber['props'], nextProps: Fiber['props']) {
+function updateDom(dom: HTMLElement | Text, prevProps: Fiber['props'], nextProps: Fiber['props']) {
+  // Remove old listeners
   Object.keys(prevProps)
     .filter(isEvent)
     .filter((key) => !(key in nextProps) || isNew(prevProps, nextProps)(key))
     .forEach((name) => {
       const eventType = name.toLowerCase().substring(2)
-
-      // FIXME ts-ignore
-      // @ts-ignore
-      dom!.removeEventListener(eventType, prevProps[name])
+      const listener = prevProps[name as keyof typeof prevProps]
+      if (typeof listener !== 'function') return
+      dom.removeEventListener(eventType, listener)
     })
 
   // Remove old properties
@@ -162,7 +160,6 @@ function updateDom(dom: Fiber['dom'], prevProps: Fiber['props'], nextProps: Fibe
     .filter(isProperty)
     .filter(isGone(nextProps))
     .forEach((name) => {
-      // FIXME ts-ignore
       // @ts-ignore
       dom[name] = ''
     })
@@ -172,20 +169,19 @@ function updateDom(dom: Fiber['dom'], prevProps: Fiber['props'], nextProps: Fibe
     .filter(isProperty)
     .filter(isNew(prevProps, nextProps))
     .forEach((name) => {
-      // FIXME ts-ignore
       // @ts-ignore
       dom[name] = nextProps[name]
     })
 
+  // Set new or changed listeners
   Object.keys(nextProps)
     .filter(isEvent)
     .filter(isNew(prevProps, nextProps))
     .forEach((name) => {
       const eventType = name.toLowerCase().substring(2)
-
-      // FIXME ts-ignore
-      // @ts-ignore
-      dom!.addEventListener(eventType, nextProps[name])
+      const listener = nextProps[name as keyof typeof nextProps]
+      if (typeof listener !== 'function') return
+      dom.addEventListener(eventType, listener)
     })
 }
 
@@ -193,7 +189,7 @@ function render(element: VirtualNode, container: HTMLElement) {
   wipRoot = {
     dom: container,
     parent: null,
-    type: 'ELEMENT', // FIXME
+    type: 'ROOT',
     props: {
       children: [element],
     },
