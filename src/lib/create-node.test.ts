@@ -35,3 +35,14 @@ test('<div id="foo"><a>link</a></div> returns expected element', () => {
     props: { id: 'foo', children: [childElement] },
   })
 })
+
+test('number is converted to string', () => {
+  const childElement = createElement('div', null, 1)
+
+  expect(childElement).toEqual({
+    type: 'div',
+    props: {
+      children: [{ props: { nodeValue: '1' }, type: 'TEXT' }],
+    },
+  })
+})

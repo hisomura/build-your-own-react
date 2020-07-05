@@ -22,7 +22,8 @@ export function createElement(type: string, props: any = null, ...children: any[
       ...props,
       children: children.map((child) => {
         if (typeof child === 'object') return child
-        if (typeof child === 'string' || child === 'number') return createText(child)
+        if (typeof child === 'string') return createText(child)
+        if (typeof child === 'number') return createText(child.toString())
         throw Error('Child is not object, string or number.')
       }),
     },
